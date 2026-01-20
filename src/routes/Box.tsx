@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ItemCard from '../components/ItemCard';
 import { supabase } from '../lib/supabase';
@@ -13,6 +13,9 @@ export default function Box() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newItem, setNewItem] = useState({ name: '', quantity: 1 });
+  const [adding, setAdding] = useState(false);
+  const [networkWarning, setNetworkWarning] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -31,11 +34,10 @@ export default function Box() {
       setLoading(false);
       if (boxData) {
         await fetchItems();
-        subscribeToItems();
       }
     }
     load();
-    return () => { ignore = true; unsubscribe(); };
+    return () => { ignore = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boxId]);
 
@@ -44,27 +46,40 @@ export default function Box() {
     setItems(data || []);
   }
 
-  const channel = useMemo(() => {
-    return supabase.channel('items-changes');
-  }, []);
-
-  function subscribeToItems() {
+  useEffect(() => {
+    if (!boxId) return;
+    const channel = supabase.channel('box-updates');
     channel
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'items', filter: `box_id=eq.${boxId}` },
-        (payload) => {
-          fetchItems();
+        (payload: any) => {
+          const event = payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE';
+          if (event === 'INSERT' && payload.new) {
+            const inserted = payload.new as Item;
+            setItems((prev) => {
+              // avoid duplicates if initial fetch already included it
+              const exists = prev.some((it) => it.id === inserted.id);
+              return exists ? prev.map((it) => (it.id === inserted.id ? inserted : it)) : [...prev, inserted];
+            });
+          } else if (event === 'UPDATE' && payload.new) {
+            const updated = payload.new as Item;
+            setItems((prev) => prev.map((it) => (it.id === updated.id ? updated : it)));
+          } else if (event === 'DELETE' && payload.old) {
+            const removed = payload.old as Item;
+            setItems((prev) => prev.filter((it) => it.id !== removed.id));
+          }
         }
       )
       .subscribe();
-  }
 
-  function unsubscribe() {
-    try {
-      supabase.removeChannel(channel);
-    } catch {}
-  }
+    return () => {
+      try {
+        supabase.removeChannel(channel);
+      } catch {}
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boxId]);
 
   async function initializeBox() {
     setCreating(true);
@@ -74,7 +89,6 @@ export default function Box() {
     } else {
       setBox(data as BoxType);
       await fetchItems();
-      subscribeToItems();
     }
     setCreating(false);
   }
@@ -82,9 +96,38 @@ export default function Box() {
   async function addItem() {
     const payload = { box_id: boxId, name: newItem.name.trim(), quantity: newItem.quantity };
     if (!payload.name) return;
+    setAddError(null);
+    setNetworkWarning(null);
     if (navigator.onLine) {
-      await supabase.from('items').insert(payload);
-      setNewItem({ name: '', quantity: 1 });
+      setAdding(true);
+      const tempId = `_temp_${Date.now()}`;
+      const tempItem: Item = { id: tempId, box_id: boxId, name: payload.name, quantity: payload.quantity } as Item;
+      setItems((prev) => [...prev, tempItem]);
+      try {
+        const { data, error } = await supabase.from('items').insert(payload).select('*');
+        if (error) {
+          // rollback optimistic item and queue
+          setItems((prev) => prev.filter((it) => it.id !== tempId));
+          enqueueAddItem(payload);
+          setNetworkWarning('Network issue: item queued and will sync when online.');
+        } else {
+          const inserted = (data && data[0]) as Item | undefined;
+          if (inserted) {
+            setItems((prev) => prev.map((it) => (it.id === tempId ? inserted : it)));
+          } else {
+            // fallback: refetch to reconcile
+            await fetchItems();
+          }
+        }
+      } catch (e: any) {
+        setItems((prev) => prev.filter((it) => it.id !== tempId));
+        enqueueAddItem(payload);
+        setNetworkWarning('Network issue: item queued and will sync when online.');
+        setAddError(e?.message || 'Failed to add item.');
+      } finally {
+        setAdding(false);
+        setNewItem({ name: '', quantity: 1 });
+      }
     } else {
       enqueueAddItem(payload);
       setNewItem({ name: '', quantity: 1 });
@@ -167,12 +210,23 @@ export default function Box() {
                 onChange={(e) => setNewItem({ ...newItem, quantity: Math.max(1, Number(e.target.value || 1)) })}
               />
               <button
-                className="ml-auto h-11 px-4 rounded-lg bg-accent text-black font-semibold"
+                className="ml-auto h-11 px-4 rounded-lg bg-accent text-black font-semibold disabled:opacity-50"
                 onClick={addItem}
+                disabled={adding}
               >
-                Add
+                {adding ? 'Adding...' : 'Add'}
               </button>
             </div>
+            {networkWarning && (
+              <div className="text-xs text-yellow-300">
+                {networkWarning}
+              </div>
+            )}
+            {addError && (
+              <div className="text-xs text-red-300">
+                {addError}
+              </div>
+            )}
             {!navigator.onLine && (
               <div className="text-xs opacity-70">
                 Offline: item queued and will sync when online.
