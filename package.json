@@ -1,0 +1,32 @@
+{
+  "name": "unpackd",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "pwa:icons": "pwa-asset-generator ./public/icon.svg ./public/pwa-assets --icon-only --favicon --opaque false --type png --path \"/\"",
+    "pwa:splash": "pwa-asset-generator ./public/icon.svg ./public/pwa-assets --splash-only --background \"#121212\" --dark-mode --type jpg --quality 80 --index ./index.html --path \"/\"",
+    "pwa:gen": "npm run pwa:icons && npm run pwa:splash"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.1",
+    "@supabase/supabase-js": "^2.43.4",
+    "vite-plugin-pwa": "^0.16.7"
+  },
+  "devDependencies": {
+    "vite": "^5.0.8",
+    "@vitejs/plugin-react": "^4.3.0",
+    "typescript": "^5.3.3",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.33",
+    "autoprefixer": "^10.4.16",
+    "pwa-asset-generator": "^8.1.2",
+    "@types/react": "^19.2.9",
+    "@types/react-dom": "^19.2.3"
+  }
+}
