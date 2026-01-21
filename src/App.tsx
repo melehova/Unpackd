@@ -1,5 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import Box from './routes/Box';
+import Home from './routes/Home';
 
 export default function App() {
   return (
@@ -19,23 +20,6 @@ export default function App() {
           <Route path="/box/:id" element={<Box />} />
         </Routes>
       </main>
-    </div>
-  );
-}
-
-function Home() {
-  return (
-    <div className="min-h-[60vh] grid place-items-center">
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold">Unpackd is ready</h1>
-        <p className="opacity-80">Use a hash route like <span className="font-mono">#/box/DEMO-BOX</span> to get started.</p>
-        <a
-          href="#/box/DEMO-BOX"
-          className="inline-block h-11 px-4 rounded-lg bg-accent text-black font-semibold"
-        >
-          Open Demo Box
-        </a>
-      </div>
     </div>
   );
 }

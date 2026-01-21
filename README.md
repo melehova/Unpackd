@@ -12,9 +12,7 @@ A cross-platform PWA for tracking moving inventory via URL-encoded NTAG215 stick
 ## Setup
 
 1. Create a Supabase project and copy URL + anon key.
-2. Create the tables and policies:
-   - Run `supabase/schema.sql` in the Supabase SQL editor.
-3. Configure environment:
+2. Configure environment:
    - Copy `.env.example` to `.env.local` and set values.
 
 ```bash
@@ -30,6 +28,10 @@ npm run dev
 ```
 
 Open the app and navigate to `/#/box/BOX_ID` to initialize or manage a box.
+
+## Schema & Types
+- The database schema is managed directly in your Supabase project.
+- Generated types are in `supabase/Supabase API.ts` and are used across the app for type safety.
 
 ## Notes
 - Real-time updates: listens to `items` changes for the specific `box_id`.

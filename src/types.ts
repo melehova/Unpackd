@@ -1,13 +1,13 @@
-export type Box = {
-  id: string;
-  nfc_id: string | null;
-  label: string | null;
-  created_at: string;
-};
+import type { Database } from '../supabase/Supabase API';
 
-export type Item = {
-  id: string;
-  box_id: string;
-  name: string;
-  quantity: number;
-};
+export type Box = Database['public']['Tables']['boxes']['Row'];
+export type Item = Database['public']['Tables']['items']['Row'];
+
+// Derived helper types
+export type ItemActivity = Pick<Item, 'box_id' | 'created_at'>;
+export type WithBoxId<T extends { box_id: string | null }> = T & { box_id: string };
+
+// Generic type guard to narrow box_id from string|null to string
+export function hasBoxId<T extends { box_id: string | null }>(obj: T): obj is T & { box_id: string } {
+	return typeof obj.box_id === 'string';
+}
