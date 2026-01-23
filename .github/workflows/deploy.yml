@@ -1,39 +1,36 @@
-name: Deploy PWA to GitHub Pages
+name: Deploy to PWA
+
 on:
   push:
-    branches: [main]
-
-# Prevents multiple deployments from running at the same time
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
-permissions:
-  contents: write
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: github-pages
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      
-      - run: npm ci
-      
-      - name: Build
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          # If your app still 404s, double-check that your vite.config.js 
-          # has 'base: "/Unpackd/"'
-      
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v4 # Updated to v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./dist
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build the app
+      env:
+        # Explicitly pass Vite-prefixed environment variables
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      run: npm run build
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
