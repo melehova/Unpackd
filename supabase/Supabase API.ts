@@ -44,19 +44,16 @@ export type Database = {
           created_at: string | null
           id: string
           label: string | null
-          nfc_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
           label?: string | null
-          nfc_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
           label?: string | null
-          nfc_id?: string
         }
         Relationships: []
       }

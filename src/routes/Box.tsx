@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ItemCard from '../components/ItemCard';
 import { supabase } from '../lib/supabase';
+import { isNFCAvailable, writeBoxTag } from '../lib/nfc';
 import { enqueueAddItem, processQueue } from '../lib/offlineQueue';
 import type { Box as BoxType, Item } from '../types';
 import type { TablesInsert, TablesUpdate } from '../../supabase/Supabase API';
@@ -25,6 +26,8 @@ export default function Box() {
     const [savingEdit, setSavingEdit] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [listEditMode, setListEditMode] = useState(false);
+    const [writingNfc, setWritingNfc] = useState(false);
+    const [nfcMessage, setNfcMessage] = useState<string | null>(null);
 
     useEffect(() => {
         let ignore = false;
@@ -112,7 +115,7 @@ export default function Box() {
 
     async function initializeBox() {
         setCreating(true);
-        const boxPayload: TablesInsert<'boxes'> = { id: boxId, label: `Box ${boxId}`, nfc_id: boxId };
+        const boxPayload: TablesInsert<'boxes'> = { id: boxId, label: `Box ${boxId}` };
         const { data, error } = await supabase
             .from('boxes')
             .insert(boxPayload)
@@ -299,6 +302,11 @@ export default function Box() {
                 >
                     {creating ? 'Creating...' : 'Create Box'}
                 </button>
+                {!isNFCAvailable() && (
+                    <div className="text-xs opacity-70">
+                        Web NFC not available. Try Android Chrome for tag writing.
+                    </div>
+                )}
             </div>
         );
     }
@@ -308,6 +316,34 @@ export default function Box() {
             <header className="space-y-1">
                 <h1 className="text-2xl font-bold">{box.label || box.id}</h1>
                 <p className="opacity-70 font-mono">{box.id}</p>
+                <div className="flex items-center gap-3 mt-2">
+                    <button
+                        className="h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm disabled:opacity-50"
+                        onClick={async () => {
+                            setNfcMessage(null);
+                            if (!isNFCAvailable()) {
+                                setNfcMessage('Web NFC not available. Use Android Chrome.');
+                                return;
+                            }
+                            try {
+                                setWritingNfc(true);
+                                const { url } = await writeBoxTag(boxId);
+                                setNfcMessage(`Tag written with URL → ${url}`);
+                            } catch (e: any) {
+                                setNfcMessage(e?.message || 'Failed to write NFC tag.');
+                            } finally {
+                                setWritingNfc(false);
+                            }
+                        }}
+                        disabled={writingNfc}
+                        aria-label="Assign NFC Tag"
+                    >
+                        {writingNfc ? 'Writing…' : 'Assign NFC Tag'}
+                    </button>
+                    {nfcMessage && (
+                        <span className="text-xs opacity-80">{nfcMessage}</span>
+                    )}
+                </div>
             </header>
 
             <section className="space-y-3">

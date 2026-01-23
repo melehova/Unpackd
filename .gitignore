@@ -4,7 +4,7 @@ node_modules/
 # Build outputs
 /dist/
 /coverage/
-
+*dist/
 # Vite & tooling caches
 .vite/
 .eslintcache

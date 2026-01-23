@@ -2,6 +2,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import Box from './routes/Box';
 import Home from './routes/Home';
 import InstallPrompt from './components/InstallPrompt';
+import DevTools from './components/DevTools';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       </header>
       <main className="max-w-xl mx-auto px-4 py-4">
         <SetupNotice />
+        {/* <DevTools /> */}
         <InstallPrompt />
         <Routes>
           <Route path="/" element={<Home />} />
