@@ -7,10 +7,6 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      # Use 'secrets.' for sensitive keys and 'vars.' for plain variables
-      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,6 +15,10 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
+        env:
+          # Use 'secrets.' for sensitive keys and 'vars.' for plain variables
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
