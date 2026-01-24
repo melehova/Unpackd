@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import ItemCard from '../components/ItemCard';
+import NewBoxDrawer from '../components/NewBoxDrawer';
 import type { Box, ItemActivity } from '../types';
 import { hasBoxId } from '../types';
 
@@ -12,6 +13,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loadingAll, setLoadingAll] = useState(true);
   const [errorAll, setErrorAll] = useState<string | null>(null);
+  const [newBoxOpen, setNewBoxOpen] = useState(false);
 
   async function loadRecent() {
     setLoading(true);
@@ -135,6 +137,23 @@ export default function Home() {
       <section className="space-y-2">
         <h2 className="text-xl font-semibold">Get Started</h2>
         <div className="opacity-80">Create or open a box like <span className="font-mono">#/box/DEMO-BOX</span>.</div>
+        <div className="flex items-center gap-3">
+          <button
+            className="h-11 px-4 rounded-lg bg-accent text-black font-semibold"
+            onClick={() => setNewBoxOpen(true)}
+          >
+            New Box
+          </button>
+        </div>
+        <NewBoxDrawer
+          open={newBoxOpen}
+          onClose={() => setNewBoxOpen(false)}
+          onCreated={() => {
+            // Refresh lists when a new box is created
+            loadAll();
+            loadRecent();
+          }}
+        />
       </section>
 
       <section className="space-y-2">

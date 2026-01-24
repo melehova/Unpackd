@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ItemCard from '../components/ItemCard';
 import { supabase } from '../lib/supabase';
-import { isNFCAvailable, writeBoxTag } from '../lib/nfc';
+import { isNFCAvailable, writeBoxTag, readTagPreview } from '../lib/nfc';
 import { enqueueAddItem, processQueue } from '../lib/offlineQueue';
 import type { Box as BoxType, Item } from '../types';
 import type { TablesInsert, TablesUpdate } from '../../supabase/Supabase API';
@@ -327,10 +327,17 @@ export default function Box() {
                             }
                             try {
                                 setWritingNfc(true);
-                                const { url } = await writeBoxTag(boxId);
-                                setNfcMessage(`Tag written with URL → ${url}`);
+                                setNfcMessage('Tap a tag to read current contents…');
+                                const preview = await readTagPreview();
+                                const proceed = window.confirm(`${preview.summary}\n\nWrite this box URL to the tag?`);
+                                if (proceed) {
+                                    const { url } = await writeBoxTag(boxId);
+                                    setNfcMessage(`Tag written with URL → ${url}`);
+                                } else {
+                                    setNfcMessage('Tag write cancelled.');
+                                }
                             } catch (e: any) {
-                                setNfcMessage(e?.message || 'Failed to write NFC tag.');
+                                setNfcMessage(e?.message || 'Failed to read/write NFC tag.');
                             } finally {
                                 setWritingNfc(false);
                             }
@@ -338,7 +345,7 @@ export default function Box() {
                         disabled={writingNfc}
                         aria-label="Assign NFC Tag"
                     >
-                        {writingNfc ? 'Writing…' : 'Assign NFC Tag'}
+                        {writingNfc ? 'Working…' : 'Assign NFC Tag'}
                     </button>
                     {nfcMessage && (
                         <span className="text-xs opacity-80">{nfcMessage}</span>
