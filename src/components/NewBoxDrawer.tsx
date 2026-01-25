@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import ItemCard from './ItemCard';
+import { Link } from 'react-router-dom';
 import { supabase, uploadBoxImageFile } from '../lib/supabase';
 import type { TablesInsert } from '../../supabase/Supabase API';
 import { enqueuePendingBoxImage } from '../lib/offlineQueue';
@@ -221,11 +222,11 @@ export default function NewBoxDrawer({ open, onClose, onCreated }: Props) {
       />
       {/* Drawer */}
       <div
-        className={`${open ? 'translate-y-0' : 'translate-y-full'} transition-transform duration-300 absolute inset-x-0 bottom-0 bg-[#121212] border-t border-white/10 rounded-t-2xl p-4 space-y-4`}
+        className={`${open ? 'translate-y-0' : 'translate-y-full'} transition-transform duration-300 absolute inset-x-0 bottom-0 h-[70vh] bg-[#121212] border-t border-white/10 rounded-t-2xl p-4 space-y-4 overflow-y-auto`}
       >
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">New Box</h2>
-          <button className="h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm" onClick={onClose}>Close</button>
+          <button className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm" onClick={onClose}>Close</button>
         </div>
 
         <ItemCard>
@@ -255,13 +256,17 @@ export default function NewBoxDrawer({ open, onClose, onCreated }: Props) {
                   }
                 }}
               />
-              {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="Box preview"
-                  className="mt-1 h-28 w-full object-cover rounded-md border border-white/10 bg-white/5"
-                />
-              )}
+              <div className="mt-1 h-28 w-full rounded-md border border-white/10 bg-white/5 flex items-center justify-center">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Box preview"
+                    className="h-full w-full object-contain rounded-md"
+                  />
+                ) : (
+                  <span className="text-xs opacity-60">No image selected</span>
+                )}
+              </div>
               <input
                 className="h-9 px-3 rounded-md bg-white/5 border border-white/10 outline-none focus:border-accent text-sm"
                 placeholder="Photo caption"
@@ -274,14 +279,14 @@ export default function NewBoxDrawer({ open, onClose, onCreated }: Props) {
             </div>
             <div className="flex items-center gap-3">
               <button
-                className="h-11 px-4 rounded-lg bg-accent text-black font-semibold disabled:opacity-50"
+                className="inline-flex items-center justify-center text-center h-11 px-4 rounded-lg bg-accent text-black font-semibold disabled:opacity-50"
                 onClick={createBox}
                 disabled={creating}
               >
                 {creating ? 'Creating…' : 'Create Box'}
               </button>
               {createdBox && (
-                <a href={`#/box/${createdBox.id}`} className="h-11 px-4 rounded-lg bg-white/5 border border-white/10 text-sm">Open</a>
+                <Link to={`/box/${createdBox.id}`} className="inline-flex items-center justify-center text-center h-11 px-4 rounded-lg bg-white/5 border border-white/10 text-sm">Open</Link>
               )}
             </div>
             {error && <div className="text-xs text-red-300">{error}</div>}
@@ -299,14 +304,14 @@ export default function NewBoxDrawer({ open, onClose, onCreated }: Props) {
             </div>
             <div className="flex items-center gap-3">
               <button
-                className="h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm disabled:opacity-50"
+                className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm disabled:opacity-50"
                 onClick={readTag}
                 disabled={reading || !isNFCAvailable()}
               >
                 {reading ? 'Reading…' : 'Read Tag'}
               </button>
               <button
-                className="h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm disabled:opacity-50"
+                className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm disabled:opacity-50"
                 onClick={assignTag}
                 disabled={writing || (!createdBox && !name.trim()) || !isNFCAvailable()}
               >

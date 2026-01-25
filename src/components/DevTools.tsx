@@ -28,7 +28,7 @@ export default function DevTools() {
     <div className="mb-3 p-2 rounded-md bg-white/5 border border-white/10 text-sm flex items-center gap-3">
       <span className="opacity-70">Dev Tools:</span>
       <button
-        className="h-9 px-3 rounded-md bg-white/10 border border-white/10"
+        className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-white/10 border border-white/10"
         onClick={resetSW}
         disabled={busy}
       >

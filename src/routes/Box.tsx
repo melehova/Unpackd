@@ -74,7 +74,7 @@ export default function Box() {
                 <h1 className="text-2xl font-bold">New Box Found</h1>
                 <p className="opacity-80">Initialize box <span className="font-mono">{boxId}</span> in the database.</p>
                 <button
-                    className="h-11 px-4 rounded-lg bg-accent text-black font-semibold disabled:opacity-50"
+                    className="inline-flex items-center justify-center text-center h-11 px-4 rounded-lg bg-accent text-black font-semibold disabled:opacity-50"
                     onClick={initializeBox}
                     disabled={creating}
                 >

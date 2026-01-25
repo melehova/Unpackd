@@ -93,14 +93,14 @@ export default function InstallPrompt() {
         </div>
         {deferred && (
           <button
-            className="h-9 px-3 rounded-md bg-accent text-black font-semibold"
+            className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-accent text-black font-semibold"
             onClick={handleInstall}
           >
             Install
           </button>
         )}
         <button
-          className="h-9 px-3 rounded-md bg-white/10"
+          className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-white/10"
           onClick={() => setDismissed(true)}
         >
           Dismiss

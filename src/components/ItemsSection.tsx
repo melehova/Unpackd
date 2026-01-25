@@ -269,7 +269,7 @@ export default function ItemsSection({ boxId }: Props) {
                 placeholder="1"
               />
               <button
-                className="ml-auto h-11 px-4 rounded-lg bg-accent text-black font-semibold disabled:opacity-50"
+                className="ml-auto inline-flex items-center justify-center text-center h-11 px-4 rounded-lg bg-accent text-black font-semibold disabled:opacity-50"
                 onClick={addItem}
                 disabled={adding}
               >
@@ -303,7 +303,7 @@ export default function ItemsSection({ boxId }: Props) {
               <option value="created_at">Created</option>
             </select>
             <button
-              className="h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm"
+              className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm"
               onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
               aria-label="Toggle sort direction"
             >
@@ -311,7 +311,7 @@ export default function ItemsSection({ boxId }: Props) {
             </button>
             <div className="w-px h-6 bg-white/10 mx-1" />
             <button
-              className={`h-9 px-3 rounded-md text-sm ${listEditMode ? 'bg-accent text-black' : 'bg-white/5 border border-white/10'}`}
+              className={`inline-flex items-center justify-center text-center h-9 px-3 rounded-md text-sm ${listEditMode ? 'bg-accent text-black' : 'bg-white/5 border border-white/10'}`}
               onClick={() => {
                 setListEditMode((prev) => {
                   const next = !prev;
@@ -347,14 +347,14 @@ export default function ItemsSection({ boxId }: Props) {
                     onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })}
                   />
                   <button
-                    className="h-9 px-3 rounded-md bg-accent text-black text-sm font-semibold disabled:opacity-50"
+                    className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-accent text-black text-sm font-semibold disabled:opacity-50"
                     onClick={saveEdit}
                     disabled={savingEdit}
                   >
                     {savingEdit ? 'Saving...' : 'Save'}
                   </button>
                   <button
-                    className="h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm"
+                    className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm"
                     onClick={cancelEdit}
                     disabled={savingEdit}
                   >
@@ -372,13 +372,13 @@ export default function ItemsSection({ boxId }: Props) {
                     {listEditMode && (
                       <>
                         <button
-                          className="h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm"
+                          className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm"
                           onClick={() => startEdit(it)}
                         >
                           Edit
                         </button>
                         <button
-                          className="h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm text-red-300 disabled:opacity-50"
+                          className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-white/5 border border-white/10 text-sm text-red-300 disabled:opacity-50"
                           onClick={() => deleteItem(it.id)}
                           disabled={deletingId === it.id}
                         >

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { byteaToSerialString } from '../lib/nfc';
 import ItemCard from '../components/ItemCard';
 import NewBoxDrawer from '../components/NewBoxDrawer';
 import type { Box, ItemActivity } from '../types';
@@ -121,10 +122,16 @@ export default function Home() {
             <ItemCard key={b.id}>
               <div className="flex items-center justify-between">
                 <div>
-                  <Link to={`/#/box/${b.id}`} className="font-semibold hover:underline">{b.label || b.id}</Link>
+                  <Link to={`/box/${b.id}`} className="font-semibold hover:underline">{b.label || b.id}</Link>
                   <div className="text-xs opacity-70">Last item at {new Date(b.last_item_at).toLocaleString()}</div>
+                  {Array.isArray(b.nfc_serials) && b.nfc_serials.length > 0 && (
+                    <div className="mt-1 text-xs opacity-70">
+                      <span className="opacity-80">Tags:</span>{' '}
+                      <span className="font-mono">{b.nfc_serials.map(byteaToSerialString).join(', ')}</span>
+                    </div>
+                  )}
                 </div>
-                <a href={`#/box/${b.id}`} className="h-9 px-3 rounded-md bg-accent text-black text-sm font-semibold">Open</a>
+                <Link to={`/box/${b.id}`} className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-accent text-black text-sm font-semibold">Open</Link>
               </div>
             </ItemCard>
           ))}
@@ -139,7 +146,7 @@ export default function Home() {
         <div className="opacity-80">Create or open a box like <span className="font-mono">#/box/DEMO-BOX</span>.</div>
         <div className="flex items-center gap-3">
           <button
-            className="h-11 px-4 rounded-lg bg-accent text-black font-semibold"
+            className="inline-flex items-center justify-center text-center h-11 px-4 rounded-lg bg-accent text-black font-semibold"
             onClick={() => setNewBoxOpen(true)}
           >
             New Box
@@ -174,10 +181,16 @@ export default function Home() {
               <ItemCard key={b.id}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <Link to={`/#/box/${b.id}`} className="font-semibold hover:underline">{b.label || b.id}</Link>
+                    <Link to={`/box/${b.id}`} className="font-semibold hover:underline">{b.label || b.id}</Link>
                     <div className="text-xs opacity-70">Created {new Date(b.created_at || '').toLocaleString()}</div>
+                    {Array.isArray(b.nfc_serials) && b.nfc_serials.length > 0 && (
+                      <div className="mt-1 text-xs opacity-70">
+                        <span className="opacity-80">Tags:</span>{' '}
+                        <span className="font-mono">{b.nfc_serials.map(byteaToSerialString).join(', ')}</span>
+                      </div>
+                    )}
                   </div>
-                  <a href={`#/box/${b.id}`} className="h-9 px-3 rounded-md bg-accent text-black text-sm font-semibold">Open</a>
+                  <Link to={`/box/${b.id}`} className="inline-flex items-center justify-center text-center h-9 px-3 rounded-md bg-accent text-black text-sm font-semibold">Open</Link>
                 </div>
               </ItemCard>
             ))}

@@ -11,7 +11,7 @@ export default function App() {
         <div className="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="text-lg font-semibold">Unpackd</Link>
           <nav className="flex gap-3">
-            <a href="#/" className="text-sm opacity-80 hover:opacity-100">Home</a>
+            <Link to="/" className="text-sm opacity-80 hover:opacity-100">Home</Link>
           </nav>
         </div>
       </header>
