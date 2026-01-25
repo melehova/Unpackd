@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import ItemCard from './ItemCard';
-import { supabase } from '../lib/supabase';
+import { supabase, uploadBoxImageFile } from '../lib/supabase';
+import type { TablesInsert } from '../../supabase/Supabase API';
+import { enqueuePendingBoxImage } from '../lib/offlineQueue';
 import { isNFCAvailable, readTagPreview, writeBoxTag } from '../lib/nfc';
 import type { Box } from '../types';
 
@@ -26,6 +28,9 @@ export default function NewBoxDrawer({ open, onClose, onCreated }: Props) {
   const [tagExistingBoxId, setTagExistingBoxId] = useState<string | null>(null);
   const [tagExistingBoxLabel, setTagExistingBoxLabel] = useState<string | null>(null);
   const [tagExistingBoxFound, setTagExistingBoxFound] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageCaption, setImageCaption] = useState<string>('');
 
   // Reset drawer state when it closes so next open starts fresh
   useEffect(() => {
@@ -45,6 +50,9 @@ export default function NewBoxDrawer({ open, onClose, onCreated }: Props) {
       setTagExistingBoxId(null);
       setTagExistingBoxLabel(null);
       setTagExistingBoxFound(false);
+      setImageFile(null);
+      setImagePreview(null);
+      setImageCaption('');
     }
   }, [open]);
 
@@ -65,6 +73,28 @@ export default function NewBoxDrawer({ open, onClose, onCreated }: Props) {
       if (error) throw new Error(error.message);
       const inserted = (data || [])[0] as Box | undefined;
       if (!inserted) throw new Error('Insert did not return the new box.');
+      // If image selected, upload and add to box_images table
+      if (imageFile) {
+        if (navigator.onLine) {
+          try {
+            const { url } = await uploadBoxImageFile(inserted.id, imageFile);
+            const { error: imgErr } = await supabase
+              .from('box_images')
+              .insert({ box_id: inserted.id, url, caption: imageCaption.trim() || null } as TablesInsert<'box_images'>);
+            if (imgErr) {
+              console.warn('Failed to insert box image:', imgErr.message);
+            }
+          } catch (imgErr: any) {
+            console.warn('Image upload failed:', imgErr?.message || imgErr);
+          }
+        } else {
+          // Offline: store preview data URL for later upload
+          if (imagePreview) {
+            enqueuePendingBoxImage(inserted.id, imagePreview, imageCaption.trim() || undefined);
+          }
+          setInfo('Offline: image will upload when back online.');
+        }
+      }
       setCreatedBox(inserted);
       setInfo(`Box created: ${inserted.label || ''} (${inserted.id})`);
       setName('');
@@ -206,6 +236,42 @@ export default function NewBoxDrawer({ open, onClose, onCreated }: Props) {
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
+            <div className="flex flex-col gap-2">
+              <label className="text-sm opacity-80">Attach Image (optional)</label>
+              <input
+                type="file"
+                accept="image/*"
+                className="text-xs"
+                onChange={(e) => {
+                  const f = e.target.files && e.target.files[0];
+                  if (f) {
+                    setImageFile(f);
+                    const reader = new FileReader();
+                    reader.onload = () => setImagePreview((reader.result as string) || null);
+                    reader.readAsDataURL(f);
+                  } else {
+                    setImageFile(null);
+                    setImagePreview(null);
+                  }
+                }}
+              />
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Box preview"
+                  className="mt-1 h-28 w-full object-cover rounded-md border border-white/10 bg-white/5"
+                />
+              )}
+              <input
+                className="h-9 px-3 rounded-md bg-white/5 border border-white/10 outline-none focus:border-accent text-sm"
+                placeholder="Photo caption"
+                value={imageCaption}
+                onChange={(e) => setImageCaption(e.target.value)}
+              />
+              {!navigator.onLine && (
+                <div className="text-xs opacity-70">Offline: image will upload later.</div>
+              )}
+            </div>
             <div className="flex items-center gap-3">
               <button
                 className="h-11 px-4 rounded-lg bg-accent text-black font-semibold disabled:opacity-50"

@@ -2,6 +2,7 @@ import type { Database } from '../supabase/Supabase API';
 
 export type Box = Database['public']['Tables']['boxes']['Row'];
 export type Item = Database['public']['Tables']['items']['Row'];
+export type BoxImage = Database['public']['Tables']['box_images']['Row'];
 
 // Derived helper types
 export type ItemActivity = Pick<Item, 'box_id' | 'created_at'>;

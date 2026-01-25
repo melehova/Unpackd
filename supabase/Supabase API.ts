@@ -39,21 +39,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      box_images: {
+        Row: {
+          box_id: string
+          caption: string | null
+          created_at: string
+          id: string
+          url: string
+        }
+        Insert: {
+          box_id: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          url: string
+        }
+        Update: {
+          box_id?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "box_images_box_id_fkey"
+            columns: ["box_id"]
+            isOneToOne: false
+            referencedRelation: "boxes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       boxes: {
         Row: {
           created_at: string | null
           id: string
           label: string | null
+          nfc_serials: string[] | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           label?: string | null
+          nfc_serials?: string[] | null
         }
         Update: {
           created_at?: string | null
           id?: string
           label?: string | null
+          nfc_serials?: string[] | null
         }
         Relationships: []
       }
